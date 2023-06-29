@@ -5,7 +5,7 @@
 import nextflow.Nextflow
 import groovy.text.SimpleTemplateEngine
 
-class WorkflowNf-cmgg-qdnaseq {
+class WorkflowQdnaseq {
 
     //
     // Check and validate parameters
