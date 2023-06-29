@@ -1,0 +1,4 @@
+author: nvnieuwk
+description: A nextflow pipeline for creating bin annotations for qDNAseq
+name: nf-cmgg-qdnaseq
+prefix: CenterForMedicalGeneticsGhent
