@@ -32,11 +32,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-//
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
 include { FASTA_MAPPABILITY_GEM2 } from '../subworkflows/local/fasta_mappability_gem2/main'
 include { PREP_ALIGNMENTS        } from '../subworkflows/local/prep_alignments/main'
+
+include { ESTIMATEREADLENGTH     } from '../modules/local/estimatereadlength/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -44,9 +43,6 @@ include { PREP_ALIGNMENTS        } from '../subworkflows/local/prep_alignments/m
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-//
-// MODULE: Installed directly from nf-core/modules
-//
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -64,7 +60,7 @@ workflow QDNASEQ {
 
     ch_versions = Channel.empty()
 
-    ch_fasta = Channel.fromPath(params.fasta).map { [[id:'reference'], it] }
+    ch_fasta = Channel.fromPath(params.fasta).map { [[id:'reference'], it] }.collect()
 
     if(!params.fai) {
         SAMTOOLS_FAIDX(
@@ -72,9 +68,9 @@ workflow QDNASEQ {
         )
         ch_versions = ch_versions.mix(SAMTOOLS_FAIDX.out.versions)
 
-        SAMTOOLS_FAIDX.out.fai.set { ch_fai }
+        SAMTOOLS_FAIDX.out.fai.collect().set { ch_fai }
     } else {
-        ch_fai = Channel.fromPath(params.fai).map { [[id:'reference'], it] }
+        ch_fai = Channel.fromPath(params.fai).map { [[id:'reference'], it] }.collect()
     }
 
     Channel.fromSamplesheet("input", immutable_meta:false)
@@ -95,7 +91,29 @@ workflow QDNASEQ {
     )
     ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
-    // Define read length for mappability
+    //
+    // Define the read length
+    //
+
+    ESTIMATEREADLENGTH(
+        PREP_ALIGNMENTS.out.bams,
+        ch_fasta,
+        ch_fai
+    )
+    ch_versions = ch_versions.mix(ESTIMATEREADLENGTH.out.versions.first())
+
+    ESTIMATEREADLENGTH.out.read_length
+        .map { it[1].tokenize(" ") }
+        .flatten()
+        .reduce([total:0, count:0]) { counts, v ->
+            counts["total"] += v as Integer
+            counts["count"]++
+            counts
+        }
+        .map { counts ->
+            return counts["total"]/counts["count"] as Integer
+        }
+        .set { val_read_length }
 
     //
     // Define the mappability of the reference FASTA
@@ -103,12 +121,10 @@ workflow QDNASEQ {
 
     FASTA_MAPPABILITY_GEM2(
         ch_fasta,
-        ch_fai
+        ch_fai,
+        val_read_length
     )
     ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GEM2.out.versions)
-
-    // Run R script for annotations
-
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

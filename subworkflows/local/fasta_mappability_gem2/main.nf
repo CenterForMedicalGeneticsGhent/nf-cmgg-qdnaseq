@@ -10,8 +10,9 @@ include { UCSC_BEDGRAPHTOBIGWIG     } from '../../../modules/nf-core/ucsc/bedgra
 workflow FASTA_MAPPABILITY_GEM2 {
 
     take:
-    ch_fasta // channel: [ val(meta), path(fasta) ]
-    ch_fai   // channel: [ val(meta), path(fai) ]
+    ch_fasta        // channel: [ val(meta), path(fasta) ]
+    ch_fai          // channel: [ val(meta), path(fai) ]
+    val_read_length // value: the mean read length
 
     main:
 
@@ -24,7 +25,7 @@ workflow FASTA_MAPPABILITY_GEM2 {
 
     GEM2_GEMMAPPABILITY(
         GEM2_GEMINDEXER.out.index,
-        "100" //TODO change this to the read length of the samples
+        val_read_length
     )
     ch_versions = ch_versions.mix(GEM2_GEMMAPPABILITY.out.versions)
 
