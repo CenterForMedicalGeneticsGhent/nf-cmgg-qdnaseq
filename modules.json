@@ -10,14 +10,19 @@
                         "git_sha": "76cc4938c1f6ea5c7d83fed1eeffc146787f9543",
                         "installed_by": ["modules"]
                     },
-                    "gem2/gemindexer": {
+                    "gawk": {
                         "branch": "master",
-                        "git_sha": "bc29cfec684055a5a6d3923831c5704214808406",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     },
-                    "gem2/gemmappability": {
+                    "genmap/index": {
                         "branch": "master",
-                        "git_sha": "6fd869ad1fcb1852a9c9c9b24dcd1207e75d3909",
+                        "git_sha": "2c4fc7bfe72e3a504e403486085f7f047a4f41c1",
+                        "installed_by": ["modules"]
+                    },
+                    "genmap/map": {
+                        "branch": "master",
+                        "git_sha": "2c4fc7bfe72e3a504e403486085f7f047a4f41c1",
                         "installed_by": ["modules"]
                     },
                     "multiqc": {
@@ -41,9 +46,9 @@
                         "installed_by": ["modules"],
                         "patch": "modules/nf-core/samtools/index/samtools-index.diff"
                     },
-                    "ucsc/bedgraphtobigwig": {
+                    "ucsc/wigtobigwig": {
                         "branch": "master",
-                        "git_sha": "9e51255c4f8ec69fb6ccf68593392835f14fecb8",
+                        "git_sha": "911696ea0b62df80e900ef244d7867d177971f73",
                         "installed_by": ["modules"]
                     }
                 }

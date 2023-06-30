@@ -32,10 +32,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { FASTA_MAPPABILITY_GEM2 } from '../subworkflows/local/fasta_mappability_gem2/main'
-include { PREP_ALIGNMENTS        } from '../subworkflows/local/prep_alignments/main'
-
-include { ESTIMATEREADLENGTH     } from '../modules/local/estimatereadlength/main'
+include { FASTA_MAPPABILITY_GENMAP  } from '../subworkflows/local/fasta_mappability_genmap/main'
+include { PREP_ALIGNMENTS           } from '../subworkflows/local/prep_alignments/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,39 +90,14 @@ workflow QDNASEQ {
     ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
     //
-    // Define the read length
-    //
-
-    ESTIMATEREADLENGTH(
-        PREP_ALIGNMENTS.out.bams,
-        ch_fasta,
-        ch_fai
-    )
-    ch_versions = ch_versions.mix(ESTIMATEREADLENGTH.out.versions.first())
-
-    ESTIMATEREADLENGTH.out.read_length
-        .map { it[1].tokenize(" ") }
-        .flatten()
-        .reduce([total:0, count:0]) { counts, v ->
-            counts["total"] += v as Integer
-            counts["count"]++
-            counts
-        }
-        .map { counts ->
-            return counts["total"]/counts["count"] as Integer
-        }
-        .set { val_read_length }
-
-    //
     // Define the mappability of the reference FASTA
     //
 
-    FASTA_MAPPABILITY_GEM2(
+    FASTA_MAPPABILITY_GENMAP(
         ch_fasta,
-        ch_fai,
-        val_read_length
+        ch_fai
     )
-    ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GEM2.out.versions)
+    ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GENMAP.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

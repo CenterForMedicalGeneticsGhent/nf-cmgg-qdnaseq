@@ -1,20 +1,20 @@
-process UCSC_BEDGRAPHTOBIGWIG {
+process UCSC_WIGTOBIGWIG {
     tag "$meta.id"
     label 'process_single'
 
     // WARN: Version information not provided by tool on CLI. Please update version string below when bumping container versions.
-    conda "bioconda::ucsc-bedgraphtobigwig=377"
+    conda "bioconda::ucsc-wigtobigwig=377"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/ucsc-bedgraphtobigwig:377--h446ed27_1' :
-        'biocontainers/ucsc-bedgraphtobigwig:377--h446ed27_1' }"
+        'https://depot.galaxyproject.org/singularity/ucsc-wigtobigwig:377--h0b8a92a_2' :
+        'biocontainers/ucsc-wigtobigwig:377--h0b8a92a_2' }"
 
     input:
-    tuple val(meta), path(bedgraph)
-    path  sizes
+    tuple val(meta), path(wig)
+    path sizes
 
     output:
-    tuple val(meta), path("*.bigWig"), emit: bigwig
-    path "versions.yml"              , emit: versions
+    tuple val(meta), path("*.bw"), emit: bw
+    path "versions.yml"          , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -24,10 +24,11 @@ process UCSC_BEDGRAPHTOBIGWIG {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def VERSION = '377' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
-    bedGraphToBigWig \\
-        $bedgraph \\
+    wigToBigWig \\
+        $args \\
+        $wig \\
         $sizes \\
-        ${prefix}.bigWig
+        ${prefix}.bw
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
@@ -39,7 +40,7 @@ process UCSC_BEDGRAPHTOBIGWIG {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def VERSION = '377' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
-    touch ${prefix}.bigWig
+    touch ${prefix}.bw
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
