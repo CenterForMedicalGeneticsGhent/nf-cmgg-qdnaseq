@@ -36,6 +36,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { FASTA_MAPPABILITY_GEM2 } from '../subworkflows/local/fasta_mappability_gem2/main'
+include { PREP_ALIGNMENTS        } from '../subworkflows/local/prep_alignments/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,22 +77,35 @@ workflow QDNASEQ {
         ch_fai = Channel.fromPath(params.fai).map { [[id:'reference'], it] }
     }
 
-    // Channel.fromSamplesheet("input", immutable_meta:false)
+    Channel.fromSamplesheet("input", immutable_meta:false)
+        .map { cram, crai ->
+            meta = [id:cram.baseName]
+            [ meta, cram, crai ]
+        }
+        .set { ch_crams }
+
+    //
+    // Prepare the aligment files
+    //
+
+    PREP_ALIGNMENTS(
+        ch_crams,
+        ch_fasta,
+        ch_fai
+    )
+    ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
     // Define read length for mappability
+
+    //
+    // Define the mappability of the reference FASTA
+    //
 
     FASTA_MAPPABILITY_GEM2(
         ch_fasta,
         ch_fai
     )
-
     ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GEM2.out.versions)
-
-    // Gem-2-bed
-
-    // UCSC bedgraphtobigwig
-
-    // Prep data
 
     // Run R script for annotations
 
