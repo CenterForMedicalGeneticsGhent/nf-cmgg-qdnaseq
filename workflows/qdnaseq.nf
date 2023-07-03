@@ -42,6 +42,7 @@ include { PREP_ALIGNMENTS           } from '../subworkflows/local/prep_alignment
 */
 
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main'
+include { TABIX_BGZIP                 } from '../modules/nf-core/tabix/bgzip/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -60,6 +61,7 @@ workflow QDNASEQ {
 
     ch_fasta = Channel.fromPath(params.fasta).map { [[id:'reference'], it] }.collect()
 
+    // FASTA index
     if(!params.fai) {
         SAMTOOLS_FAIDX(
             ch_fasta
@@ -70,6 +72,36 @@ workflow QDNASEQ {
     } else {
         ch_fai = Channel.fromPath(params.fai).map { [[id:'reference'], it] }.collect()
     }
+
+    // Blacklist BED
+    if(!params.blacklist) {
+        encode_url = "https://github.com/Boyle-Lab/Blacklist/raw/master/lists"
+        blacklist = file("${encode_url}/${params.genome}-blacklist.v2.bed.gz")
+        if(!blacklist.exists()) {
+            exit 1, "Cannot find a blacklist file for ${params.genome}. Please supply one with the --blacklist option. (Also mind that the pipeline expects short notations of the the gneome (e.g. hg38 instead of GRCh38))"
+        }
+        ch_blacklist_input = Channel.of([[id:"blacklist_${params.genome}"], blacklist])
+    } else {
+        ch_blacklist_input = Channel.of([[id:"blacklist_${params.genome}"], file(params.blacklist, checkIfExists:true)])
+    }
+
+    ch_blacklist_input
+        .branch { meta, bed ->
+            extension = bed.getExtension()
+            no_gz: extension != "gz"
+            gz: extension == "gz"
+        }
+        .set { ch_gz_input }
+
+    TABIX_BGZIP(
+        ch_gz_input.gz
+    )
+    ch_versions = ch_versions.mix(TABIX_BGZIP.out.versions.first())
+
+    ch_gz_input.no_gz
+        .mix(TABIX_BGZIP.out.output)
+        .collect()
+        .set { ch_blacklist }
 
     Channel.fromSamplesheet("input", immutable_meta:false)
         .map { cram, crai ->
