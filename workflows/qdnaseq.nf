@@ -45,6 +45,7 @@ include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/
 include { TABIX_BGZIP                 } from '../modules/nf-core/tabix/bgzip/main'
 include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main'
 include { UNTAR                       } from '../modules/nf-core/untar/main'
+include { CREATE_ANNOTATIONS          } from '../modules/local/create_annotations/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -155,6 +156,20 @@ workflow QDNASEQ {
         ch_fai
     )
     ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GENMAP.out.versions)
+
+    //
+    // Create the qdnaseq annotations
+    //
+
+    CREATE_ANNOTATIONS(
+        Channel.fromList(params.bin_sizes.tokenize(",")),
+        PREP_ALIGNMENTS.out.bams,
+        FASTA_MAPPABILITY_GENMAP.out.bigwig,
+        ch_blacklist
+    )
+    ch_versions = ch_versions.mix(CREATE_ANNOTATIONS.out.versions.first())
+
+    CREATE_ANNOTATIONS.out.annotation.view()
 
     //
     // Dump software versions

@@ -41,7 +41,7 @@ workflow FASTA_MAPPABILITY_GENMAP {
     ch_versions = ch_versions.mix(UCSC_WIGTOBIGWIG.out.versions)
 
     emit:
-    bigwig = UCSC_WIGTOBIGWIG.out.bw
+    bigwig = UCSC_WIGTOBIGWIG.out.bw.collect()
 
     versions = ch_versions
 

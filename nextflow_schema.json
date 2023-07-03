@@ -82,7 +82,6 @@
                 "bwa": {
                     "type": "string",
                     "format": "path",
-                    "exists": true,
                     "mimetype": "text/plain",
                     "description": "The BWA index.",
                     "fa_icon": "far fa-file-code"
@@ -90,7 +89,6 @@
                 "blacklist": {
                     "type": "string",
                     "format": "file-path",
-                    "exists": true,
                     "mimetype": "text/plain",
                     "pattern": "^\\S+\\.bed(\\.gz)?$",
                     "description": "The blacklist BED file.",

@@ -60,6 +60,11 @@ workflow PREP_ALIGNMENTS {
 
     ch_bams
         .join(SAMTOOLS_INDEX.out.index)
+        .map { meta, bam, bai ->
+            [ [id:"bams"], bam, bai]
+        }
+        .groupTuple()
+        .collect()
         .set { ch_bams_out }
 
     emit:
