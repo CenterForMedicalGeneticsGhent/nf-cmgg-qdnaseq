@@ -43,6 +43,8 @@ include { PREP_ALIGNMENTS           } from '../subworkflows/local/prep_alignment
 
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main'
 include { TABIX_BGZIP                 } from '../modules/nf-core/tabix/bgzip/main'
+include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main'
+include { UNTAR                       } from '../modules/nf-core/untar/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -96,28 +98,51 @@ workflow QDNASEQ {
     TABIX_BGZIP(
         ch_gz_input.gz
     )
-    ch_versions = ch_versions.mix(TABIX_BGZIP.out.versions.first())
+    ch_versions = ch_versions.mix(TABIX_BGZIP.out.versions)
 
     ch_gz_input.no_gz
         .mix(TABIX_BGZIP.out.output)
         .collect()
         .set { ch_blacklist }
 
-    Channel.fromSamplesheet("input", immutable_meta:false)
-        .map { cram, crai ->
-            meta = [id:cram.baseName]
-            [ meta, cram, crai ]
+    // BWA index
+    if(!params.bwa) {
+        BWA_INDEX(
+            ch_fasta
+        )
+        ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
+
+        BWA_INDEX.out.index.set { ch_bwa_index }
+    } else {
+        ch_bwa_index_in = Channel.from([[id:"reference"], file(params.bwa, checkIfExists:true)])
+        if(params.bwa.endswith("tar.gz")) {
+            UNTAR(
+                ch_bwa_index_in
+            )
+            ch_versions = ch_versions.mix(UNTAR.out.versions)
+
+            UNTAR.out.untar.set { ch_bwa_index }
+        } else {
+            ch_bwa_index_in.set { ch_bwa_index }
         }
-        .set { ch_crams }
+    }
+
+    // Samplesheet
+    Channel.fromSamplesheet("input", immutable_meta:false)
+        .map { meta, fastq_1, fastq_2 ->
+            new_meta = meta + [single_end:fastq_2 ? false : true]
+            output = fastq_2 ? [ new_meta, [fastq_1, fastq_2] ] : [ new_meta, fastq_1 ]
+            output
+        }
+        .set { ch_fastq }
 
     //
     // Prepare the aligment files
     //
 
     PREP_ALIGNMENTS(
-        ch_crams,
-        ch_fasta,
-        ch_fai
+        ch_fastq,
+        ch_bwa_index,
     )
     ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
@@ -130,6 +155,10 @@ workflow QDNASEQ {
         ch_fai
     )
     ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GENMAP.out.versions)
+
+    //
+    // Dump software versions
+    //
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
