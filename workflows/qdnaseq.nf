@@ -58,10 +58,6 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Info required for completion email and summary
 def multiqc_report = []
 
-// Some additional parameter logic
-if(!params.annotation_genome) {
-    params.annotation_genome = params.genome
-}
 
 workflow QDNASEQ {
 
