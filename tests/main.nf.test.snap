@@ -3,8 +3,8 @@
         "content": [
             "hg38.5kbp.rda:md5,d41d8cd98f00b204e9800998ecf8427e",
             "hg38.10kbp.rda:md5,d41d8cd98f00b204e9800998ecf8427e",
-            false
+            true
         ],
-        "timestamp": "2023-07-04T08:59:15+0000"
+        "timestamp": "2023-07-04T09:02:29+0000"
     }
 }
