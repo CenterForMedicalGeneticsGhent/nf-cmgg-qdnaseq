@@ -8,14 +8,17 @@ lint:
     - .github/ISSUE_TEMPLATE/config.yml
     - .github/workflows/awstest.yml
     - .github/workflows/awsfulltest.yml
+    - lib/WorkflowNf-cmgg-qdnaseq.groovy
   files_unchanged:
     - CODE_OF_CONDUCT.md
     - assets/nf-core-nf-cmgg-qdnaseq_logo_light.png
     - docs/images/nf-core-nf-cmgg-qdnaseq_logo_light.png
     - docs/images/nf-core-nf-cmgg-qdnaseq_logo_dark.png
     - .github/ISSUE_TEMPLATE/bug_report.yml
+    - docs/README.md
   nextflow_config:
     - manifest.name
     - manifest.homePage
   multiqc_config:
     - report_comment
+  pipeline_name_conventions: false
