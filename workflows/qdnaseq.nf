@@ -116,16 +116,16 @@ workflow QDNASEQ {
 
         BWA_INDEX.out.index.set { ch_bwa_index }
     } else {
-        ch_bwa_index_in = Channel.from([[id:"reference"], file(params.bwa, checkIfExists:true)])
+        ch_bwa_index_in = Channel.from([[id:"reference"], file(params.bwa, checkIfExists:true)]).collect()
         if(params.bwa.endsWith("tar.gz")) {
             UNTAR(
                 ch_bwa_index_in
             )
             ch_versions = ch_versions.mix(UNTAR.out.versions)
 
-            UNTAR.out.untar.set { ch_bwa_index }
+            UNTAR.out.untar.collect().set { ch_bwa_index }
         } else {
-            ch_bwa_index_in.set { ch_bwa_index }
+            ch_bwa_index_in.collect().set { ch_bwa_index }
         }
     }
 
