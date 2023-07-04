@@ -35,7 +35,6 @@ process SAMTOOLS_INDEX {
     stub:
     """
     touch ${input}.bai
-    touch ${input}.crai
     touch ${input}.csi
 
     cat <<-END_VERSIONS > versions.yml

@@ -14,5 +14,13 @@ Changes in module 'nf-core/samtools/index'
  
      when:
      task.ext.when == null || task.ext.when
+@@ -37,7 +35,6 @@
+     stub:
+     """
+     touch ${input}.bai
+-    touch ${input}.crai
+     touch ${input}.csi
+ 
+     cat <<-END_VERSIONS > versions.yml
 
 ************************************************************

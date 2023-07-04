@@ -62,4 +62,28 @@ process BWA_ALN {
         END_VERSIONS
         """
     }
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+
+    if (meta.single_end) {
+        """
+        touch ${prefix}.sai
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
+        END_VERSIONS
+        """
+    } else {
+        """
+        touch ${prefix}.1.sai
+        touch ${prefix}.1.sai2
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            bwa: \$(echo \$(bwa 2>&1) | sed 's/^.*Version: //; s/Contact:.*\$//')
+        END_VERSIONS
+        """
+    } 
 }

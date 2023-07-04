@@ -1,10 +1,10 @@
 {
     "Should run without failures": {
         "content": [
-            "hg38.5kbp.rda:md5,cc714135d6ed27336fb7915a489d2d8b",
-            "hg38.10kbp.rda:md5,bc52b77b3cc98c7351c1843c7e74005d",
+            "hg38.5kbp.rda:md5,d41d8cd98f00b204e9800998ecf8427e",
+            "hg38.10kbp.rda:md5,d41d8cd98f00b204e9800998ecf8427e",
             false
         ],
-        "timestamp": "2023-07-04T07:59:14+0000"
+        "timestamp": "2023-07-04T08:59:15+0000"
     }
 }
