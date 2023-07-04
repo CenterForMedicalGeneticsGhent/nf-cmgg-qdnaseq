@@ -1,0 +1,25 @@
+Changes in module 'nf-core/trimgalore'
+--- modules/nf-core/trimgalore/main.nf
++++ modules/nf-core/trimgalore/main.nf
+@@ -40,7 +40,7 @@
+         def args_list = args.split("\\s(?=--)").toList()
+         args_list.removeAll { it.toLowerCase().contains('_r2 ') }
+         """
+-        [ ! -f  ${prefix}.fastq.gz ] && ln -s $reads ${prefix}.fastq.gz
++        # [ ! -f  ${prefix}.fastq.gz ] && ln -s $reads ${prefix}.fastq.gz
+         trim_galore \\
+             ${args_list.join(' ')} \\
+             --cores $cores \\
+@@ -55,8 +55,8 @@
+         """
+     } else {
+         """
+-        [ ! -f  ${prefix}_1.fastq.gz ] && ln -s ${reads[0]} ${prefix}_1.fastq.gz
+-        [ ! -f  ${prefix}_2.fastq.gz ] && ln -s ${reads[1]} ${prefix}_2.fastq.gz
++        # [ ! -f  ${prefix}_1.fastq.gz ] && ln -s ${reads[0]} ${prefix}_1.fastq.gz
++        # [ ! -f  ${prefix}_2.fastq.gz ] && ln -s ${reads[1]} ${prefix}_2.fastq.gz
+         trim_galore \\
+             $args \\
+             --cores $cores \\
+
+************************************************************
