@@ -24,7 +24,6 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 
 </details>
 
-
 ### MultiQC
 
 <details markdown="1">
