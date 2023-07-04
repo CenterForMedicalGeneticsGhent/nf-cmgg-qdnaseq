@@ -40,7 +40,7 @@ process TRIMGALORE {
         def args_list = args.split("\\s(?=--)").toList()
         args_list.removeAll { it.toLowerCase().contains('_r2 ') }
         """
-        # [ ! -f  ${prefix}.fastq.gz ] && ln -s $reads ${prefix}.fastq.gz
+        [ ! -f  ${prefix}.fastq.gz ] && ln -s $reads ${prefix}.fastq.gz
         trim_galore \\
             ${args_list.join(' ')} \\
             --cores $cores \\
@@ -55,8 +55,8 @@ process TRIMGALORE {
         """
     } else {
         """
-        # [ ! -f  ${prefix}_1.fastq.gz ] && ln -s ${reads[0]} ${prefix}_1.fastq.gz
-        # [ ! -f  ${prefix}_2.fastq.gz ] && ln -s ${reads[1]} ${prefix}_2.fastq.gz
+        [ ! -f  ${prefix}_1.fastq.gz ] && ln -s ${reads[0]} ${prefix}_1.fastq.gz
+        [ ! -f  ${prefix}_2.fastq.gz ] && ln -s ${reads[1]} ${prefix}_2.fastq.gz
         trim_galore \\
             $args \\
             --cores $cores \\
@@ -64,6 +64,31 @@ process TRIMGALORE {
             --gzip \\
             ${prefix}_1.fastq.gz \\
             ${prefix}_2.fastq.gz
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            trimgalore: \$(echo \$(trim_galore --version 2>&1) | sed 's/^.*version //; s/Last.*\$//')
+            cutadapt: \$(cutadapt --version)
+        END_VERSIONS
+        """
+    }
+
+    stub:
+    def prefix = task.ext.prefix ?: "${meta.id}"
+    if (meta.single_end) {
+        """
+        touch ${prefix}.50bp_5prime.fq.gz
+
+        cat <<-END_VERSIONS > versions.yml
+        "${task.process}":
+            trimgalore: \$(echo \$(trim_galore --version 2>&1) | sed 's/^.*version //; s/Last.*\$//')
+            cutadapt: \$(cutadapt --version)
+        END_VERSIONS
+        """
+    } else {
+        """
+        touch ${prefix}_1.50bp_5prime.fq.gz
+        touch ${prefix}_2.50bp_5prime.fq.gz
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
