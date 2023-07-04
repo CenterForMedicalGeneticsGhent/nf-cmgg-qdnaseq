@@ -144,7 +144,7 @@ workflow QDNASEQ {
 
     PREP_ALIGNMENTS(
         ch_fastq,
-        ch_bwa_index,
+        ch_bwa_index.view(),
     )
     ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
