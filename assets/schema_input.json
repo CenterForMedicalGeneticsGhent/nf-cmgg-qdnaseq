@@ -15,13 +15,13 @@
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^.*\\.fastq(\\.gz)?$"        
+                "pattern": "^.*\\.fastq(\\.gz)?$"
             },
             "fastq_2": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^.*\\.fastq(\\.gz)?$"        
+                "pattern": "^.*\\.fastq(\\.gz)?$"
             }
         },
         "required": ["fastq_1", "sample"]

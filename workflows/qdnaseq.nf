@@ -58,6 +58,11 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Info required for completion email and summary
 def multiqc_report = []
 
+// Some additional parameter logic
+if(!params.annotation_genome) {
+    params.annotation_genome = params.genome
+}
+
 workflow QDNASEQ {
 
     ch_versions = Channel.empty()
@@ -79,13 +84,13 @@ workflow QDNASEQ {
     // Blacklist BED
     if(!params.blacklist) {
         encode_url = "https://github.com/Boyle-Lab/Blacklist/raw/master/lists"
-        blacklist = file("${encode_url}/${params.genome}-blacklist.v2.bed.gz")
+        blacklist = file("${encode_url}/${params.annotation_genome}-blacklist.v2.bed.gz")
         if(!blacklist.exists()) {
-            exit 1, "Cannot find a blacklist file for ${params.genome}. Please supply one with the --blacklist option. (Also mind that the pipeline expects short notations of the the gneome (e.g. hg38 instead of GRCh38))"
+            exit 1, "Cannot find a blacklist file for ${params.annotation_genome}. Please supply one with the --blacklist option. (Also mind that the pipeline expects short notations of the --annotation_genome (e.g. hg38 instead of GRCh38))"
         }
-        ch_blacklist_input = Channel.of([[id:"blacklist_${params.genome}"], blacklist])
+        ch_blacklist_input = Channel.of([[id:"blacklist_${params.annotation_genome}"], blacklist])
     } else {
-        ch_blacklist_input = Channel.of([[id:"blacklist_${params.genome}"], file(params.blacklist, checkIfExists:true)])
+        ch_blacklist_input = Channel.of([[id:"blacklist_${params.annotation_genome}"], file(params.blacklist, checkIfExists:true)])
     }
 
     ch_blacklist_input
@@ -168,8 +173,6 @@ workflow QDNASEQ {
         ch_blacklist
     )
     ch_versions = ch_versions.mix(CREATE_ANNOTATIONS.out.versions.first())
-
-    CREATE_ANNOTATIONS.out.annotation.view()
 
     //
     // Dump software versions

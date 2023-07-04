@@ -21,7 +21,7 @@ process CREATE_ANNOTATIONS {
     template "create_annotations.R"
 
     stub:
-    def prefix = task.ext.prefix ?: "${params.genome}.${bin_size}kbp"
+    def prefix = task.ext.prefix ?: "${params.annotation_genome}.${bin_size}kbp"
 
     """
     touch ${prefix}.rda
