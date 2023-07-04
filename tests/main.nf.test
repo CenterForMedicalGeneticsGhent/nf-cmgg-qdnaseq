@@ -1,0 +1,24 @@
+nextflow_pipeline {
+
+    name "Test Workflow main.nf"
+    script "main.nf"
+    options "-stub"
+
+    test("Should run without failures") {
+
+        expect {
+            def date = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new Date())
+            assertAll(
+                { assert workflow.success },
+                { assert snapshot(
+                        path("${outputDir}/annotations-${date}/hg38.5kbp.rda"),
+                        path("${outputDir}/annotations-${date}/hg38.10kbp.rda"),
+                        file("${outputDir}/multiqc_reports/multiqc_report.html").exists()
+                    ).match()
+                }
+            )
+        }
+
+    }
+
+}

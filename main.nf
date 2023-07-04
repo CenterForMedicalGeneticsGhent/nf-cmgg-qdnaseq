@@ -15,7 +15,9 @@ nextflow.enable.dsl = 2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-params.fasta = WorkflowMain.getGenomeAttribute(params, 'fasta')
+params.fasta  = WorkflowMain.getGenomeAttribute(params, 'fasta')
+params.fai    = WorkflowMain.getGenomeAttribute(params, 'fai')
+params.bwa    = WorkflowMain.getGenomeAttribute(params, 'bwa')
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -47,13 +49,13 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { NF-CMGG-QDNASEQ } from './workflows/nf-cmgg-qdnaseq'
+include { QDNASEQ } from './workflows/qdnaseq'
 
 //
 // WORKFLOW: Run main CenterForMedicalGeneticsGhent/nf-cmgg-qdnaseq analysis pipeline
 //
-workflow CENTERFORMEDICALGENETICSGHENT_NF-CMGG-QDNASEQ {
-    NF-CMGG-QDNASEQ ()
+workflow CENTERFORMEDICALGENETICSGHENT_QDNASEQ {
+    QDNASEQ ()
 }
 
 /*
@@ -67,7 +69,7 @@ workflow CENTERFORMEDICALGENETICSGHENT_NF-CMGG-QDNASEQ {
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
 workflow {
-    CENTERFORMEDICALGENETICSGHENT_NF-CMGG-QDNASEQ ()
+    CENTERFORMEDICALGENETICSGHENT_QDNASEQ ()
 }
 
 /*
