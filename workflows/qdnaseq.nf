@@ -117,7 +117,7 @@ workflow QDNASEQ {
         BWA_INDEX.out.index.set { ch_bwa_index }
     } else {
         ch_bwa_index_in = Channel.from([[id:"reference"], file(params.bwa, checkIfExists:true)])
-        if(params.bwa.endswith("tar.gz")) {
+        if(params.bwa.endsWith("tar.gz")) {
             UNTAR(
                 ch_bwa_index_in
             )
