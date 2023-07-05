@@ -6,12 +6,11 @@ library(BiocManager)
 library(QDNAseq)
 library(future)
 
-BiocManager::install("BSgenome.Hsapiens.UCSC.${params.annotation_genome}")
-library(BSgenome.Hsapiens.UCSC.${params.annotation_genome})
+library($genomes, lib.loc="$genomes")
 
 binsize <- ${bin_size}
 
-bins <- createBins(bsgenome=BSgenome.Hsapiens.UCSC.${params.annotation_genome}, binSize=binsize)
+bins <- createBins(bsgenome=$genomes, binSize=binsize)
 bins\$mappability <- calculateMappability(
     bins,
     bigWigFile="${bigwig}",
@@ -45,7 +44,7 @@ bins <- AnnotatedDataFrame(bins,
     )
 )
 
-save(bins, file=paste0("${params.annotation_genome}.${bin_size}kbp.rda"), compress='xz')
+save(bins, file=paste0("${params.annotation_genome}.${bin_size}kbp.rds"), compress='xz')
 
 sink("versions.yml")
 cat("\\"task.process\\":\n")

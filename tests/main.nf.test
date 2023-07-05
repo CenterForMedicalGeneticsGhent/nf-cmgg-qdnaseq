@@ -11,8 +11,8 @@ nextflow_pipeline {
             assertAll(
                 { assert workflow.success },
                 { assert snapshot(
-                        path("${outputDir}/annotations-${date}/hg38.5kbp.rda"),
-                        path("${outputDir}/annotations-${date}/hg38.10kbp.rda"),
+                        path("${outputDir}/annotations-${date}/hg38.5kbp.rds"),
+                        path("${outputDir}/annotations-${date}/hg38.10kbp.rds"),
                         file("${outputDir}/multiqc_reports/multiqc_report.html").exists()
                     ).match()
                 }

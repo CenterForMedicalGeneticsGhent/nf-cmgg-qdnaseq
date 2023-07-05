@@ -43,8 +43,7 @@ include { PREP_ALIGNMENTS           } from '../subworkflows/local/prep_alignment
 
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main'
 include { TABIX_BGZIP                 } from '../modules/nf-core/tabix/bgzip/main'
-include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main'
-include { UNTAR                       } from '../modules/nf-core/untar/main'
+include { GET_BSGENOME                } from '../modules/local/get_bsgenome/main'
 include { CREATE_ANNOTATIONS          } from '../modules/local/create_annotations/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -137,6 +136,16 @@ workflow QDNASEQ {
     ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GENMAP.out.versions)
 
     //
+    // Get the BSgenome for the genome
+    //
+
+    GET_BSGENOME(
+        params.annotation_genome,
+        params.species
+    )
+    ch_versions = ch_versions.mix(GET_BSGENOME.out.versions)
+
+    //
     // Create the qdnaseq annotations
     //
 
@@ -144,7 +153,8 @@ workflow QDNASEQ {
         Channel.fromList(params.bin_sizes.tokenize(",")),
         PREP_ALIGNMENTS.out.bams,
         FASTA_MAPPABILITY_GENMAP.out.bigwig,
-        ch_blacklist
+        ch_blacklist,
+        GET_BSGENOME.out.genome.collect()
     )
     ch_versions = ch_versions.mix(CREATE_ANNOTATIONS.out.versions.first())
 
