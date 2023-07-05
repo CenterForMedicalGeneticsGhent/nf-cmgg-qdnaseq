@@ -12,3 +12,5 @@ RUN micromamba install -y --name base -c conda-forge -c bioconda -c defaults \
     bioconductor-rtracklayer==1.58.0 \
     r-r.cache==0.16.0 \
     && micromamba clean --all --yes
+
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
