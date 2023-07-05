@@ -107,44 +107,22 @@ workflow QDNASEQ {
         .collect()
         .set { ch_blacklist }
 
-    // BWA index
-    if(!params.bwa) {
-        BWA_INDEX(
-            ch_fasta
-        )
-        ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
-
-        BWA_INDEX.out.index.set { ch_bwa_index }
-    } else {
-        ch_bwa_index_in = Channel.from([[id:"reference"], file(params.bwa, checkIfExists:true)]).collect()
-        if(params.bwa.endsWith("tar.gz")) {
-            UNTAR(
-                ch_bwa_index_in
-            )
-            ch_versions = ch_versions.mix(UNTAR.out.versions)
-
-            UNTAR.out.untar.collect().set { ch_bwa_index }
-        } else {
-            ch_bwa_index_in.collect().set { ch_bwa_index }
-        }
-    }
-
     // Samplesheet
     Channel.fromSamplesheet("input", immutable_meta:false)
-        .map { meta, fastq_1, fastq_2 ->
-            new_meta = meta + [single_end:fastq_2 ? false : true]
-            output = fastq_2 ? [ new_meta, [fastq_1, fastq_2] ] : [ new_meta, fastq_1 ]
-            output
+        .map { cram, crai ->
+            meta = [id:cram.baseName]
+            [ meta, cram, crai ]
         }
-        .set { ch_fastq }
+        .set { ch_cram }
 
     //
-    // Prepare the aligment files
+    // Prepare the alignment files
     //
 
     PREP_ALIGNMENTS(
-        ch_fastq,
-        ch_bwa_index,
+        ch_cram,
+        ch_fasta,
+        ch_fai
     )
     ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
