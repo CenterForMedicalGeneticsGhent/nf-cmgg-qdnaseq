@@ -84,13 +84,6 @@
                     "description": "Path to FASTA genome index file.",
                     "fa_icon": "far fa-file-code"
                 },
-                "bwa": {
-                    "type": "string",
-                    "format": "path",
-                    "mimetype": "text/plain",
-                    "description": "The BWA index.",
-                    "fa_icon": "far fa-file-code"
-                },
                 "blacklist": {
                     "type": "string",
                     "format": "file-path",
