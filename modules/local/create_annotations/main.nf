@@ -2,7 +2,7 @@ process CREATE_ANNOTATIONS {
     tag "$bin_size"
     label 'process_single'
 
-    container "quay.io/cmgg/qdnaseq:0.0.3"
+    container "cmgg/qdnaseq:0.0.3"
 
     input:
     val(bin_size)
