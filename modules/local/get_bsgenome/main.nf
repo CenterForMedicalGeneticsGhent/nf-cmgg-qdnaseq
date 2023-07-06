@@ -2,7 +2,7 @@ process GET_BSGENOME {
     tag "$genome"
     label 'process_single'
 
-    container "docker.io/bioconductor/bioconductor:RELEASE_3_17"
+    container "cmgg/qdnaseq:0.0.3"
 
     input:
     val(genome)
