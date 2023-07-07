@@ -2,7 +2,9 @@ process GET_BSGENOME {
     tag "$genome"
     label 'process_single'
 
-    container "cmgg/qdnaseq:0.0.3"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'shub://Bioconductor/bioconductor_docker:latest' :
+        'docker.io/bioconductor/bioconductor:3.17' }"
 
     input:
     val(genome)
