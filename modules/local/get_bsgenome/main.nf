@@ -2,7 +2,7 @@ process GET_BSGENOME {
     tag "$genome"
     label 'process_single'
 
-    container "cmgg/qdnaseq:0.0.3"
+    container "cmgg/qdnaseq:0.0.4"
 
     input:
     val(genome)

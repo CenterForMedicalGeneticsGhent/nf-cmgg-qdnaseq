@@ -16,3 +16,4 @@ RUN micromamba install -y --name base -c conda-forge -c bioconda -c defaults \
     && micromamba clean --all --yes
 
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
+ENV PATH "$MAMBA_ROOT_PREFIX/bin:$PATH"
