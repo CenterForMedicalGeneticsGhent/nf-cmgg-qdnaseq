@@ -3,8 +3,8 @@ process GET_BSGENOME {
     label 'process_single'
 
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'shub://Bioconductor/bioconductor_docker:latest' :
-        'docker.io/bioconductor/bioconductor:3.17' }"
+        'https://datasets.datalad.org/shub/Bioconductor/bioconductor_docker:release_3_10' :
+        'docker.io/bioconductor/bioconductor:3.10' }"
 
     input:
     val(genome)
