@@ -3,6 +3,8 @@
 # load required packages
 library(BiocManager)
 
+Sys.setenv("R_LIBS_SITE" = "BSgenome.${species}.UCSC.${genome}")
+
 dir.create("./BSgenome.${species}.UCSC.${genome}")
 
 install("BSgenome.${species}.UCSC.${genome}", lib="BSgenome.${species}.UCSC.${genome}")
