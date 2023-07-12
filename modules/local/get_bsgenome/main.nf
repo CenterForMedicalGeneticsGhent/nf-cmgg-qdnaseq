@@ -7,6 +7,7 @@ process GET_BSGENOME {
     input:
     val(genome)
     val(species)
+    env R_LIBS_USER
 
     output:
     path("BSgenome.${species}.UCSC.${genome}")  , emit: genome

@@ -141,7 +141,8 @@ workflow QDNASEQ {
 
     GET_BSGENOME(
         params.annotation_genome,
-        params.species
+        params.species,
+        "./BSgenome.${params.species}.UCSC.${params.annotation_genome}"
     )
     ch_versions = ch_versions.mix(GET_BSGENOME.out.versions)
 
