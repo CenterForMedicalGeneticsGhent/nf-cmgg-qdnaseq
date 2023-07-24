@@ -1,6 +1,6 @@
 process CREATE_ANNOTATIONS {
     tag "$bin_size"
-    label 'process_single'
+    label 'process_medium'
 
     container "cmgg/qdnaseq:0.0.4"
 
