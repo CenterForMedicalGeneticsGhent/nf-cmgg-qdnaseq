@@ -10,8 +10,8 @@ nextflow_pipeline {
             def date = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new Date())
             assertAll(
                 { assert workflow.success },
-                { assert file("${outputDir}/annotations-${date}/hg38.5kbp.rds").exists() },
-                { assert file("${outputDir}/annotations-${date}/hg38.10kbp.rds").exists() },
+                { assert file("${outputDir}/annotations-${date}/hg38.5kbp.rda").exists() },
+                { assert file("${outputDir}/annotations-${date}/hg38.10kbp.rda").exists() },
                 { assert file("${outputDir}/multiqc_reports/multiqc_report.html").exists() }
             )
         }

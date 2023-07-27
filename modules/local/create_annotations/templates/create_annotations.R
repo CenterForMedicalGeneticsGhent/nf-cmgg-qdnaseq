@@ -44,7 +44,7 @@ bins <- AnnotatedDataFrame(bins,
     )
 )
 
-save(bins, file=paste0("${params.annotation_genome}.${bin_size}kbp.rds"), compress='xz')
+save(bins, file=paste0("${params.annotation_genome}.${bin_size}kbp.rda"), compress='xz')
 
 sink("versions.yml")
 cat("\\"task.process\\":\n")
