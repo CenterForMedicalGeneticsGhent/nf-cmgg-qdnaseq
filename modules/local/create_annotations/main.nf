@@ -12,7 +12,7 @@ process CREATE_ANNOTATIONS {
     path(genomes)
 
     output:
-    tuple val(meta), path("*.rds"), emit: annotation
+    tuple val(meta), path("*.rda"), emit: annotation
     path "versions.yml"           , emit: versions
 
     when:
