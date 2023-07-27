@@ -23,7 +23,7 @@ bins\$residual <- NA
 bins\$use <- bins\$bases > 0
 
 #
-tg <- binReadCounts(bins, path="bams", chunkSize=1E6)
+tg <- binReadCounts(bins, path="bams", chunkSize=1E7)
 
 bins\$residual <- iterateResiduals(tg)
 
