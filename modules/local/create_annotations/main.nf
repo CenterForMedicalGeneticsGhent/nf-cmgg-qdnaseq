@@ -25,7 +25,7 @@ process CREATE_ANNOTATIONS {
     def prefix = task.ext.prefix ?: "${params.annotation_genome}.${bin_size}kbp"
 
     """
-    touch ${prefix}.rds
+    touch ${params.annotation_genome}.${bin_size}kbp.rda
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
