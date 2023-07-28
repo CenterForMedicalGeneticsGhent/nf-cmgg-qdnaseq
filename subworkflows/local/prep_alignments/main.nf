@@ -2,6 +2,7 @@
 // Prepare the alignment files
 //
 
+include { SAMTOOLS_MERGE    } from '../../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_INDEX    } from '../../../modules/nf-core/samtools/index/main'
 include { SAMTOOLS_CONVERT  } from '../../../modules/nf-core/samtools/convert/main'
 
@@ -17,6 +18,24 @@ workflow PREP_ALIGNMENTS {
     ch_versions = Channel.empty()
 
     ch_cram
+        .groupTuple() // No size needed here because it cannot create a bottleneck
+        .branch { meta, cram, crai ->
+            multiple: cram.size() > 1
+                return [ meta, cram ]
+            single: cram.size() == 1
+                return [ meta, cram[0], crai[0] ]
+        }
+        .set { ch_merge_input}
+
+    SAMTOOLS_MERGE(
+        ch_merge_input.multiple,
+        ch_fasta,
+        ch_fai
+    )
+    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions.first())
+
+    SAMTOOLS_MERGE.out.bam.map { it + [[]] }
+        .mix(ch_merge_input.single)
         .branch { meta, cram, crai ->
             extension = cram.extension
             cram: extension == "cram"
@@ -36,6 +55,7 @@ workflow PREP_ALIGNMENTS {
         .branch { meta, bam, bai ->
             index: bai
             no_index: !bai
+                return [ meta, bam ]
         }
         .set { ch_index_input }
 
