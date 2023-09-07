@@ -7,23 +7,19 @@
     "items": {
         "type": "object",
         "properties": {
-            "sample": {
-                "type": "string",
-                "meta": ["id"]
-            },
-            "fastq_1": {
+            "cram": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^.*\\.fastq(\\.gz)?$"
+                "pattern": "^.*\\.(b|cr)am$"
             },
-            "fastq_2": {
+            "crai": {
                 "type": "string",
                 "format": "file-path",
                 "exists": true,
-                "pattern": "^.*\\.fastq(\\.gz)?$"
+                "pattern": "^.*\\.(b|cr)ai$"
             }
         },
-        "required": ["fastq_1", "sample"]
+        "required": ["cram"]
     }
 }

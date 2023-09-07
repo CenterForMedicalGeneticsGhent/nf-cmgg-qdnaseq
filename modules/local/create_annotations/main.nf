@@ -1,14 +1,15 @@
 process CREATE_ANNOTATIONS {
     tag "$bin_size"
-    label 'process_single'
+    label 'process_medium'
 
-    container "quay.io/cmgg/qdnaseq:0.0.1"
+    container "cmgg/qdnaseq:0.0.4"
 
     input:
     val(bin_size)
     tuple val(meta), path(bams, stageAs:"bams/*"), path(bais, stageAs:"bams/*")
     tuple val(meta2), path(bigwig)
     tuple val(meta3), path(blacklist)
+    path(genomes)
 
     output:
     tuple val(meta), path("*.rda"), emit: annotation
@@ -24,7 +25,7 @@ process CREATE_ANNOTATIONS {
     def prefix = task.ext.prefix ?: "${params.annotation_genome}.${bin_size}kbp"
 
     """
-    touch ${prefix}.rda
+    touch ${params.annotation_genome}.${bin_size}kbp.rda
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

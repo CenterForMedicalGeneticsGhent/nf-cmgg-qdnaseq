@@ -8,11 +8,9 @@
 
 **CenterForMedicalGeneticsGhent/nf-cmgg-qdnaseq** is a bioinformatics pipeline for creating qDNAseq annotations
 
-1. Trim FASTQ files to read lengths of 50 with Trimmomatic
-2. Align the reads with BWA (aln and samse/sampe)
-3. Create a mappability WIG file with GenMap
-4. Convert the WIG to BigWig with UCSC WigToBigWig
-5. Create the annotations using a custom R script
+1. Create a mappability WIG file with GenMap
+2. Convert the WIG to BigWig with UCSC WigToBigWig
+3. Create the annotations using a custom R script
 
 ## Usage
 
