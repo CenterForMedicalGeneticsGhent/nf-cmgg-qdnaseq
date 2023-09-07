@@ -43,8 +43,7 @@ include { PREP_ALIGNMENTS           } from '../subworkflows/local/prep_alignment
 
 include { SAMTOOLS_FAIDX              } from '../modules/nf-core/samtools/faidx/main'
 include { TABIX_BGZIP                 } from '../modules/nf-core/tabix/bgzip/main'
-include { BWA_INDEX                   } from '../modules/nf-core/bwa/index/main'
-include { UNTAR                       } from '../modules/nf-core/untar/main'
+include { GET_BSGENOME                } from '../modules/local/get_bsgenome/main'
 include { CREATE_ANNOTATIONS          } from '../modules/local/create_annotations/main'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
@@ -107,44 +106,22 @@ workflow QDNASEQ {
         .collect()
         .set { ch_blacklist }
 
-    // BWA index
-    if(!params.bwa) {
-        BWA_INDEX(
-            ch_fasta
-        )
-        ch_versions = ch_versions.mix(BWA_INDEX.out.versions)
-
-        BWA_INDEX.out.index.set { ch_bwa_index }
-    } else {
-        ch_bwa_index_in = Channel.from([[id:"reference"], file(params.bwa, checkIfExists:true)]).collect()
-        if(params.bwa.endsWith("tar.gz")) {
-            UNTAR(
-                ch_bwa_index_in
-            )
-            ch_versions = ch_versions.mix(UNTAR.out.versions)
-
-            UNTAR.out.untar.collect().set { ch_bwa_index }
-        } else {
-            ch_bwa_index_in.collect().set { ch_bwa_index }
-        }
-    }
-
     // Samplesheet
     Channel.fromSamplesheet("input", immutable_meta:false)
-        .map { meta, fastq_1, fastq_2 ->
-            new_meta = meta + [single_end:fastq_2 ? false : true]
-            output = fastq_2 ? [ new_meta, [fastq_1, fastq_2] ] : [ new_meta, fastq_1 ]
-            output
+        .map { cram, crai ->
+            meta = [id:cram.baseName]
+            [ meta, cram, crai ]
         }
-        .set { ch_fastq }
+        .set { ch_cram }
 
     //
-    // Prepare the aligment files
+    // Prepare the alignment files
     //
 
     PREP_ALIGNMENTS(
-        ch_fastq,
-        ch_bwa_index,
+        ch_cram,
+        ch_fasta,
+        ch_fai
     )
     ch_versions = ch_versions.mix(PREP_ALIGNMENTS.out.versions)
 
@@ -159,6 +136,17 @@ workflow QDNASEQ {
     ch_versions = ch_versions.mix(FASTA_MAPPABILITY_GENMAP.out.versions)
 
     //
+    // Get the BSgenome for the genome
+    //
+
+    GET_BSGENOME(
+        params.annotation_genome,
+        params.species,
+        "./BSgenome.${params.species}.UCSC.${params.annotation_genome}"
+    )
+    ch_versions = ch_versions.mix(GET_BSGENOME.out.versions)
+
+    //
     // Create the qdnaseq annotations
     //
 
@@ -166,7 +154,8 @@ workflow QDNASEQ {
         Channel.fromList(params.bin_sizes.tokenize(",")),
         PREP_ALIGNMENTS.out.bams,
         FASTA_MAPPABILITY_GENMAP.out.bigwig,
-        ch_blacklist
+        ch_blacklist,
+        GET_BSGENOME.out.genome.collect()
     )
     ch_versions = ch_versions.mix(CREATE_ANNOTATIONS.out.versions.first())
 

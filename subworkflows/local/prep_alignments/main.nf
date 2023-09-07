@@ -2,66 +2,73 @@
 // Prepare the alignment files
 //
 
-include { TRIMGALORE        } from '../../../modules/nf-core/trimgalore/main'
-include { BWA_ALN           } from '../../../modules/nf-core/bwa/aln/main'
-include { BWA_SAMSE         } from '../../../modules/nf-core/bwa/samse/main'
-include { BWA_SAMPE         } from '../../../modules/nf-core/bwa/sampe/main'
+include { SAMTOOLS_MERGE    } from '../../../modules/nf-core/samtools/merge/main'
 include { SAMTOOLS_INDEX    } from '../../../modules/nf-core/samtools/index/main'
+include { SAMTOOLS_CONVERT  } from '../../../modules/nf-core/samtools/convert/main'
 
 workflow PREP_ALIGNMENTS {
 
     take:
-    ch_fastq        // channel: [ val(meta), path(fastq_1), path(fastq_2)]
-    ch_bwa_index    // channel: [ val(meta2), path(index) ]
+    ch_cram     // channel: [ val(meta), path(cram), path(crai)]
+    ch_fasta    // channel: [ val(meta2), path(fasta) ]
+    ch_fai      // channel: [ val(meta3), path(fai) ]
 
     main:
 
     ch_versions = Channel.empty()
 
-    TRIMGALORE(
-        ch_fastq
-    )
-    ch_versions = ch_versions.mix(TRIMGALORE.out.versions.first())
-
-    BWA_ALN(
-        TRIMGALORE.out.reads,
-        ch_bwa_index
-    )
-    ch_versions = ch_versions.mix(BWA_ALN.out.versions.first())
-
-    ch_fastq
-        .join(BWA_ALN.out.sai, failOnDuplicate:true, failOnMismatch:true)
-        .branch { meta, reads, sai ->
-            single_end: meta.single_end
-            paired_end: !meta.single_end
+    ch_cram
+        .groupTuple() // No size needed here because it cannot create a bottleneck
+        .branch { meta, cram, crai ->
+            multiple: cram.size() > 1
+                return [ meta, cram ]
+            single: cram.size() == 1
+                return [ meta, cram[0], crai[0] ]
         }
-        .set { ch_sai }
+        .set { ch_merge_input}
 
-    BWA_SAMSE(
-        ch_sai.single_end,
-        ch_bwa_index
+    SAMTOOLS_MERGE(
+        ch_merge_input.multiple,
+        ch_fasta,
+        ch_fai
     )
-    ch_versions = ch_versions.mix(BWA_SAMSE.out.versions.first())
+    ch_versions = ch_versions.mix(SAMTOOLS_MERGE.out.versions.first())
 
-    BWA_SAMPE(
-        ch_sai.paired_end,
-        ch_bwa_index
+    SAMTOOLS_MERGE.out.bam.map { it + [[]] }
+        .mix(ch_merge_input.single)
+        .branch { meta, cram, crai ->
+            extension = cram.extension
+            cram: extension == "cram"
+            bam:  extension == "bam"
+        }
+        .set { ch_convert_input }
+
+    SAMTOOLS_CONVERT(
+        ch_convert_input.cram,
+        ch_fasta.map { it[1] },
+        ch_fai.map{ it[1] }
     )
-    ch_versions = ch_versions.mix(BWA_SAMPE.out.versions.first())
+    ch_versions = ch_versions.mix(SAMTOOLS_CONVERT.out.versions.first())
 
-    BWA_SAMPE.out.bam
-        .mix(BWA_SAMSE.out.bam)
-        .set { ch_bams }
+    SAMTOOLS_CONVERT.out.alignment_index
+        .mix(ch_convert_input.bam)
+        .branch { meta, bam, bai ->
+            index: bai
+            no_index: !bai
+                return [ meta, bam ]
+        }
+        .set { ch_index_input }
 
     SAMTOOLS_INDEX(
-        ch_bams
+        ch_index_input.no_index
     )
     ch_versions = ch_versions.mix(SAMTOOLS_INDEX.out.versions.first())
 
-    ch_bams
-        .join(SAMTOOLS_INDEX.out.index)
+    ch_index_input.no_index
+        .join(SAMTOOLS_INDEX.out.index, failOnDuplicate:true, failOnMismatch:true)
+        .mix(ch_index_input.index)
         .map { meta, bam, bai ->
-            [ [id:"bams"], bam, bai]
+            [ [id:"bams"], bam, bai ]
         }
         .groupTuple()
         .collect()

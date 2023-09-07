@@ -6,12 +6,11 @@ library(BiocManager)
 library(QDNAseq)
 library(future)
 
-BiocManager::install("BSgenome.Hsapiens.UCSC.${params.annotation_genome}")
-library(BSgenome.Hsapiens.UCSC.${params.annotation_genome})
+library($genomes, lib.loc="$genomes")
 
 binsize <- ${bin_size}
 
-bins <- createBins(bsgenome=BSgenome.Hsapiens.UCSC.${params.annotation_genome}, binSize=binsize)
+bins <- createBins(bsgenome=$genomes, binSize=binsize)
 bins\$mappability <- calculateMappability(
     bins,
     bigWigFile="${bigwig}",
@@ -24,7 +23,7 @@ bins\$residual <- NA
 bins\$use <- bins\$bases > 0
 
 #
-tg <- binReadCounts(bins, path="bams")
+tg <- binReadCounts(bins, path="bams", chunkSize=1E7)
 
 bins\$residual <- iterateResiduals(tg)
 

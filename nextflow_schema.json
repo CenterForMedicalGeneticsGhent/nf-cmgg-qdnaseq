@@ -53,7 +53,7 @@
             "type": "object",
             "fa_icon": "fas fa-dna",
             "description": "Reference genome related files and options required for the workflow.",
-            "required": ["genome"],
+            "required": ["genome", "species"],
             "properties": {
                 "genome": {
                     "type": "string",
@@ -64,6 +64,11 @@
                     "type": "string",
                     "default": null,
                     "description": "The name of the genome used to create the annotations. This will default to the value supplied with --genome."
+                },
+                "species": {
+                    "type": "string",
+                    "description": "Name of the species. Needs to be in this format: Hsapiens (First name as a capital letter and last name as all lowercase letters)",
+                    "fa_icon": "fas fa-book"
                 },
                 "fasta": {
                     "type": "string",
@@ -82,13 +87,6 @@
                     "mimetype": "text/plain",
                     "pattern": "^\\S+\\.fai$",
                     "description": "Path to FASTA genome index file.",
-                    "fa_icon": "far fa-file-code"
-                },
-                "bwa": {
-                    "type": "string",
-                    "format": "path",
-                    "mimetype": "text/plain",
-                    "description": "The BWA index.",
                     "fa_icon": "far fa-file-code"
                 },
                 "blacklist": {
